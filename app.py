@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit_javascript as st_js
 import json
 import time
 from search import ask
@@ -9,13 +10,20 @@ html = '''
     padding-top: 0px;
     padding-left: 20px;
     padding-right: 20px;
-    padding-bottom: 0px
+    padding-bottom: 30px
 }
 .st-emotion-cache-1y4p8pa{
     max-width: 1200px;
 }
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
+header {visibility:hidden;}
+.block-container {padding-top:1rem;}
+.e1fqkh3o4 {padding-top:1rem;}
+.fullHeight {height : 80vh;}
 </style>
 '''
+
 with open('catecismo.json','r',encoding = 'utf-8') as f:
     cat = json.load(f)
     cat = {int(key):cat[key] for key in cat}
@@ -26,8 +34,8 @@ st.markdown(html,unsafe_allow_html = True)
 
 st.markdown('''<h1 style='text-align: center; font-family: "times-new-roman"'>Pergunte ao Catecismo</h1>''', unsafe_allow_html=True)
 tabquest,tabbook,tabsearch = st.tabs(['Pergunte','Texto Completo','Buscar Parágrafos'])
-contquest = tabquest.container(height = 430)
 prompt = tabquest.chat_input("Faça uma pergunta.")
+contquest = tabquest.container()
 def word_generator(string):
     def gen():
         for word in string.split():
@@ -35,14 +43,16 @@ def word_generator(string):
             time.sleep(0.02)
     return gen
 if prompt:
-    contquest.write(prompt)
+    contquest.write(f'<b>{prompt}</b>',unsafe_allow_html = True)
     respostas = ask(prompt)
     for resp in respostas:
         contquest.write_stream(word_generator(resp))
-tabsearch.number_input('Parágrafo',min_value = 1,max_value = last_key,key = 'paragrafo',step = 5)
-contsearch = tabsearch.container(height = 430)
+
+colbar,colspace = tabsearch.columns([.2,.8])
+colbar.number_input('Parágrafo',min_value = 1,max_value = last_key,key = 'paragrafo',step = 5)
+contsearch = tabsearch.container()
 for key in range(st.session_state.paragrafo,min(last_key + 1,st.session_state.paragrafo + 5)):
     contsearch.write(cat[key])
-contbook = tabbook.container(height = 500)
+contbook = tabbook.container()
 for key in cat:
     contbook.write(cat[key])
