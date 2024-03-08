@@ -22,12 +22,31 @@ def embed(sentences):
 with open('catecismo.json','r',encoding = 'utf-8') as f:
     parags = list(json.load(f).values())
 
+with open('catpio.json','r',encoding = 'utf-8') as f:
+    qea = json.load(f)
+    respostas = list(qea.values())
+    perguntas = list(qea.keys())
+
 embeds = pd.read_csv('embeddings.csv')
 nbrs = NearestNeighbors(n_neighbors = 3, algorithm = 'ball_tree').fit(embeds.values)
+
+pio_embeds = pd.read_csv('pio_embeddings.csv')
+nbrs_pio = NearestNeighbors(n_neighbors = 1, algorithm = 'ball_tree').fit(pio_embeds.values)
 
 def ask(pergunta):
     if not pergunta:
         return []
     enc = embed([pergunta])
     distances,indices = nbrs.kneighbors(enc)
-    return [parags[i] for i in indices[0]]
+    trechos = [parags[i] for i in indices[0]]
+    return trechos
+
+def ask_pio(pergunta):
+    if not pergunta:
+        return ''
+    enc = embed([pergunta.removesuffix('?').removesuffix('.').lower()])
+    distances,indices = nbrs_pio.kneighbors(enc)
+    print(perguntas[indices[0][0]])
+    if distances[0][0] <= 2.5:
+        return respostas[indices[0][0]]
+    return ''

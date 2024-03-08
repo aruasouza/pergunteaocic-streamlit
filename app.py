@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit_javascript as st_js
 import json
 import time
-from search import ask
+from search import ask,ask_pio
 
 html = '''
 <style>
@@ -20,7 +20,6 @@ footer {visibility:hidden;}
 header {visibility:hidden;}
 .block-container {padding-top:1rem;}
 .e1fqkh3o4 {padding-top:1rem;}
-.fullHeight {height : 80vh;}
 </style>
 '''
 
@@ -43,7 +42,11 @@ def word_generator(string):
             time.sleep(0.02)
     return gen
 if prompt:
-    contquest.write(f'<b>{prompt}</b>',unsafe_allow_html = True)
+    contquest.write(f'**{prompt}**')
+    pio = ask_pio(prompt)
+    if pio:
+        contquest.write_stream(word_generator(' '.join([f'*{w}*' for w in pio.split()])))
+        contquest.write('<sup><i>Catecismo de São Pio X</i></sup>',unsafe_allow_html = True)
     respostas = ask(prompt)
     for resp in respostas:
         contquest.write_stream(word_generator(resp))

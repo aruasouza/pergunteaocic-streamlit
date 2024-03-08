@@ -3,4 +3,4 @@ pandas
 transformers
 torch
 streamlit
-streamlit-javascript
+sentencepiece
