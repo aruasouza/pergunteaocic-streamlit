@@ -3,6 +3,7 @@ from sklearn.neighbors import NearestNeighbors
 import pandas as pd
 from transformers import AutoTokenizer,AutoModel
 import torch
+import re
 
 tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
 model = AutoModel.from_pretrained('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
@@ -35,16 +36,14 @@ nbrs_pio = NearestNeighbors(n_neighbors = 1, algorithm = 'ball_tree').fit(pio_em
 
 def ask(pergunta):
     if not pergunta:
-        return []
-    enc = embed([pergunta])
+        return '',[]
+    perg = re.sub(r'[^a-z0-9\sáéíóúâêôãõàç-]','',pergunta.lower()).replace('-',' ')
+    enc = embed([perg])
     distances,indices = nbrs.kneighbors(enc)
     trechos = [parags[i] for i in indices[0]]
-    return trechos
+    return ask_pio(enc),trechos
 
-def ask_pio(pergunta):
-    if not pergunta:
-        return ''
-    enc = embed([pergunta.removesuffix('?').removesuffix('.').lower()])
+def ask_pio(enc):
     distances,indices = nbrs_pio.kneighbors(enc)
     print(perguntas[indices[0][0]])
     if distances[0][0] <= 2.5:
