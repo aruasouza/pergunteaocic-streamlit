@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit_javascript as st_js
 import json
 import time
 from search import ask
